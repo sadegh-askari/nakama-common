@@ -21,6 +21,7 @@ declare namespace nkruntime {
         env: {[key: string]: string},
         executionMode: string,
         node: string,
+        headers: {[key: string]: string[]},
         queryParams: {[key: string]: string[]},
         userId: string,
         username: string,
@@ -238,7 +239,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessage(opcode: number, data?: string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
+        broadcastMessage(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
 
         /**
          * Defer message broadcast to match presences.
@@ -250,7 +251,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessageDeferred(opcode: number, data?: string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
+        broadcastMessageDeferred(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
 
         /**
          * Kick presences from match.
@@ -279,7 +280,7 @@ declare namespace nkruntime {
         persistence: boolean;
         status: string;
         opCode: number;
-        data: string;
+        data: Uint8Array;
         reliable: boolean;
         receiveTime: number;
     }
@@ -801,6 +802,7 @@ declare namespace nkruntime {
         matchLeave: MatchLeaveFunction;
         matchLoop: MatchLoopFunction;
         matchTerminate: MatchTerminateFunction;
+        matchSignal: MatchSignalFunction;
     }
 
     /**
@@ -905,6 +907,24 @@ declare namespace nkruntime {
          * @param graceSeconds - Number of seconds to gracefully terminate the match. If this time elapses before the function returns the match will be forcefully terminated.
          */
         (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, graceSeconds: number): {state: MatchState} | null;
+    }
+
+    /**
+     * Match signal function definition.
+     */
+    export interface MatchSignalFunction {
+        /**
+         * User match leave function definition.
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param dispatcher - Message dispatcher APIs.
+         * @param tick - Current match loop tick.
+         * @param state - Current match state.
+         * @param data - Arbitrary data the signal caller is sending to the match signal handler.
+         * @returns object with state and optional response data string to the signal caller.
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, data: string): {state: MatchState, data?: string} | null;
     }
 
     /**
@@ -2734,6 +2754,7 @@ declare namespace nkruntime {
         updateTime: string
         providerPayload: string
         environment: ValidatedPurchaseEnvironment
+        seenBefore: boolean
     }
 
     export interface ValidatedPurchaseList {
@@ -2769,6 +2790,22 @@ declare namespace nkruntime {
      * The server APIs available in the game server.
      */
     export interface Nakama {
+        /**
+         * Convert binary data to string.
+         *
+         * @param data - Data to convert to string.
+         * @throws {TypeError}
+         */
+         binaryToString(data: Uint8Array): string;
+
+        /**
+         * Convert a string to binary data.
+         *
+         * @param str - String to convert to binary data.
+         * @throws {TypeError}
+         */
+         stringToBinary(str: string): Uint8Array;
+
         /**
          * Emit an event to be processed.
          *
@@ -3524,7 +3561,7 @@ declare namespace nkruntime {
         /**
          * Get a running match info.
          *
-         * @param matchID - Match ID.
+         * @param id - Match ID.
          * @returns match data.
          * @throws {TypeError, GoError}
          */
@@ -3545,6 +3582,17 @@ declare namespace nkruntime {
         matchList(limit: number, authoritative?: boolean | null, label?: string | null, minSize?: number | null, maxSize?: number | null, query?: string | null): Match[]
 
         /**
+         * Signal a match and receive a response.
+         *
+         * @param id - Match ID.
+         * @param data - Arbitrary data to pass to the match signal handler.
+         * @returns response data from the signal handler, if any.
+         * @throws {TypeError, GoError}
+         */
+        matchSignal(id: string, data: string): string
+
+
+      /**
          * Send a notification.
          *
          * @param userId - User ID.
@@ -3748,10 +3796,11 @@ declare namespace nkruntime {
          * Create a new tournament.
          *
          * @param tournamentID - Tournament id.
-         * @param sortOrder - Opt. Sort tournament in desc or asc order. Defauts to "desc".
+         * @param authoritative - Opt. Whether or not to only allow authoritative score submissions.
+         * @param sortOrder - Opt. Sort tournament in desc or asc order. Defaults to "desc".
          * @param operator - Opt. Score operator "best", "set" or "incr" (refer to the docs for more info). Defaults to "best".
          * @param duration - Opt. Duration of the tournament (unix epoch).
-         * @param resetSchedule - Opt. Tournament reset schedule (cron synthax).
+         * @param resetSchedule - Opt. Tournament reset schedule (cron syntax).
          * @param metadata - Opt. metadata object.
          * @param title -  Opt. Tournament title.
          * @param description - Opt. Tournament description.
@@ -3765,6 +3814,7 @@ declare namespace nkruntime {
          */
         tournamentCreate(
             tournamentID: string,
+            authoritative: boolean,
             sortOrder: SortOrder,
             operator: Operator,
             duration: number,
@@ -4107,6 +4157,20 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         channelMessageSend(channelId: string, content?: {[key: string]: any}, senderId?: string, senderUsername?: string, persist?: boolean): ChannelMessageSendAck
+
+        /**
+         * Update channel message.
+         *
+         * @param channelId - Channel ID.
+         * @param messageId - Message ID of message to be updated.
+         * @param content - Message content.
+         * @param senderId - Opt. Message sender ID.
+         * @param senderUsername - Opt. Sender username. Defaults to system user.
+         * @param persist - Opt. Store message. Defaults to true.
+         * @returns Ack of sent message.
+         * @throws {TypeError, GoError}
+         */
+         channelMessageUpdate(channelId: string, messageId: string, content?: {[key: string]: any}, senderId?: string, senderUsername?: string, persist?: boolean): ChannelMessageSendAck
 
         /**
          * Send channel message.

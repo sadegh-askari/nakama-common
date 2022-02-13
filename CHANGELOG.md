@@ -4,8 +4,38 @@ All notable changes to this project are documented below.
 The format is based on [keep a changelog](http://keepachangelog.com) and this project uses [semantic versioning](http://semver.org).
 
 ## [Unreleased]
+### Added
+- Add ctx field to access http request headers in the Lua and JavaScript runtimes.
+- New JavaScript runtime stringToBinary and binaryToString functions.
+
+### Changed
+- JavaScript runtime match data changed to use Uint8Array type.
+
+## [1.20.0] - 2021-10-29
+### Added
+- Allow creation of relayed matches with a name. Names are still mapped to match identifiers.
+
+### Changed
+- Expose Nakama errors to the server runtime.
+
+## [1.19.0] - 2021-10-15
+### Added
+- Match signal handler as part of the match handler definition.
+- Add match signal function to server framework.
+- Add a prev cursor to the PurchaseList message.
+
+## [1.18.0] - 2021-09-28
+### Changed
+- Use named return parameters in leaderboard and tournament listings.
+- Add authoritative parameter on tournament create. Same as in leaderboard create.
+
+## [1.17.0] - 2021-09-09
+### Added
+- Add ChannelMessageUpdate function to server framework.
+
 ### Fixed
-- Improve ValidatedPurchase TS definitions
+- Improve ValidatedPurchase TS definitions.
+- Show "rank" field in leaderboard record TS definition.
 
 ## [1.16.0] - 2021-08-10
 ### Added
@@ -13,6 +43,9 @@ The format is based on [keep a changelog](http://keepachangelog.com) and this pr
 - Add function to retrieve a random set of users to server framework.
 - Add ChannelMessageSend function to server framework.
 - Add BuildChannelId function to server framework.
+
+### Changed
+- Return already seen receipts with a 'seen_before' flag set to true instead of returning an error if one is detected.
 
 ### Fixed
 - Fix TypeScript "nkruntime.Context" value types.

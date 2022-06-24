@@ -4,7 +4,58 @@ All notable changes to this project are documented below.
 The format is based on [keep a changelog](http://keepachangelog.com) and this project uses [semantic versioning](http://semver.org).
 
 ## [Unreleased]
+### Added
+- Add subscription validation APIs and runtime functions for Google and Apple.
 
+## [1.23.0] - 2022-05-22
+### Added
+- Add custom metrics publishing functions to Lua and JavaScript runtimes.
+- Add missing "sessionLogout" TypeScript definition.
+- Add "FriendsBlock" function to the Lua and JavaScript runtimes.
+- Add "ChannelMessagesList" function to the Lua and JavaScript runtimes.
+- New "countMultiple" parameter in the "MatchmakerAdd" TypeScript definition.
+
+### Changed
+- Update naming of delete notifications before/after hook registration functions.
+- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions.
+
+### Fixed
+- Rename field in "ValidatedPurchase" to "providerResponse" to match what the server returns.
+- Add missing "label" field to "Match" TypeScript definition.
+
+## [1.22.0] - 2022-03-21
+### Added
+- Add "GroupUsersBan" function to the runtimes.
+- Add "FriendsAdd" and "FriendsDelete" functions to the runtimes.
+- Add "LeaderboardRecordsHaystack" function to the runtimes.
+- Add "NotificationSendAll" function to the runtimes, for sending a notification to all users.
+- Propagate outgoing envelopes in realtime message after hooks.
+- Add inputs for matchmaker option to enforce a multiple of resulting matched count.
+
+### Changed
+- Add senderID param to "channelIdBuild".
+
+## [1.21.0] - 2021-12-16
+### Added
+- Add ctx field to access http request headers in the Lua and JavaScript runtimes.
+- New JavaScript runtime stringToBinary and binaryToString functions.
+
+### Changed
+- JavaScript runtime match data changed to use Uint8Array type.
+- Added IAP validation `persist` parameter to make persistence optional.
+
+## [1.20.0] - 2021-10-29
+### Added
+- Allow creation of relayed matches with a name. Names are still mapped to match identifiers.
+
+### Changed
+- Expose Nakama errors to the server runtime.
+
+## [1.19.0] - 2021-10-15
+### Added
+- Match signal handler as part of the match handler definition.
+- Add match signal function to server framework.
+- Add a prev cursor to the PurchaseList message.
 
 ## [1.18.0] - 2021-09-28
 ### Changed

@@ -33,7 +33,8 @@ declare namespace nkruntime {
         matchId: string,
         matchNode: string,
         matchLabel: string,
-        matchTickRate: number
+        matchTickRate: number,
+        lang: string,
     }
 
     type ReadPermissionValues = 0 | 1 | 2;
@@ -151,9 +152,10 @@ declare namespace nkruntime {
          * @param ctx - The context for the execution.
          * @param logger - The server logger.
          * @param nk - The Nakama server APIs.
-         * @param envelope - The Envelope message received by the function.
+         * @param output - The response envelope, if any.
+         * @param input - The Envelope message received by the function.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, envelope: T): void;
+        (ctx: Context, logger: Logger, nk: Nakama, output: T | null, input: T): void;
     }
 
     /**
@@ -795,20 +797,20 @@ declare namespace nkruntime {
     /**
      * Match handler definitions
      */
-    export interface MatchHandler {
-        matchInit: MatchInitFunction;
-        matchJoinAttempt: MatchJoinAttemptFunction;
-        matchJoin: MatchJoinFunction;
-        matchLeave: MatchLeaveFunction;
-        matchLoop: MatchLoopFunction;
-        matchTerminate: MatchTerminateFunction;
-        matchSignal: MatchSignalFunction;
+    export interface MatchHandler<State = MatchState> {
+        matchInit: MatchInitFunction<State>;
+        matchJoinAttempt: MatchJoinAttemptFunction<State>;
+        matchJoin: MatchJoinFunction<State>;
+        matchLeave: MatchLeaveFunction<State>;
+        matchLoop: MatchLoopFunction<State>;
+        matchTerminate: MatchTerminateFunction<State>;
+        matchSignal: MatchSignalFunction<State>;
     }
 
     /**
      * Match initialization function definition.
      */
-    export interface MatchInitFunction {
+    export interface MatchInitFunction<State = MatchState> {
         /**
          * Match initialization function definition.
          * @param ctx - The context for the execution.
@@ -817,13 +819,13 @@ declare namespace nkruntime {
          * @param params - Match create http request parameters.
          * @returns An object with the match state, tick rate and labels.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, params: {[key: string]: string}): {state: MatchState, tickRate: number, label: string};
+        (ctx: Context, logger: Logger, nk: Nakama, params: {[key: string]: string}): {state: State, tickRate: number, label: string};
     }
 
     /**
      * Match join attempt function definition.
      */
-    export interface MatchJoinAttemptFunction {
+    export interface MatchJoinAttemptFunction<State = MatchState> {
         /**
          * User match join attempt function definition.
          * @param ctx - The context for the execution.
@@ -836,13 +838,13 @@ declare namespace nkruntime {
          * @param metadata - Metadata object.
          * @returns object with state, acceptUser and optional rejection message if acceptUser is false.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, presence: Presence, metadata: {[key: string]: any}): {state: MatchState, accept: boolean, rejectMessage?: string} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, presence: Presence, metadata: {[key: string]: any}): {state: State, accept: boolean, rejectMessage?: string} | null;
     }
 
     /**
      * Match join function definition.
      */
-    export interface MatchJoinFunction {
+    export interface MatchJoinFunction<State = MatchState> {
         /**
          * User match join function definition.
          * @param ctx - The context for the execution.
@@ -854,13 +856,13 @@ declare namespace nkruntime {
          * @param presences - List of presences.
          * @returns object with the new state of the match.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, presences: Presence[]): {state: MatchState} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, presences: Presence[]): {state: State} | null;
     }
 
     /**
      * Match leave function definition.
      */
-    export interface MatchLeaveFunction {
+    export interface MatchLeaveFunction<State = MatchState> {
         /**
          * User match leave function definition.
          * @param ctx - The context for the execution.
@@ -872,13 +874,13 @@ declare namespace nkruntime {
          * @param presences - List of presences.
          * @returns object with the new state of the match.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, presences: Presence[]): {state: MatchState} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, presences: Presence[]): {state: State} | null;
     }
 
     /**
      * Match loop function definition.
      */
-    export interface MatchLoopFunction {
+    export interface MatchLoopFunction<State = MatchState> {
         /**
          * User match leave function definition.
          * @param ctx - The context for the execution.
@@ -889,13 +891,13 @@ declare namespace nkruntime {
          * @param state - Current match state.
          * @param messages - Received messages in the buffer.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, messages: MatchMessage[]): {state: MatchState} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, messages: MatchMessage[]): {state: State} | null;
     }
 
     /**
      * Match terminate function definition.
      */
-    export interface MatchTerminateFunction {
+    export interface MatchTerminateFunction<State = MatchState> {
         /**
          * User match leave function definition.
          * @param ctx - The context for the execution.
@@ -906,13 +908,13 @@ declare namespace nkruntime {
          * @param state - Current match state.
          * @param graceSeconds - Number of seconds to gracefully terminate the match. If this time elapses before the function returns the match will be forcefully terminated.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, graceSeconds: number): {state: MatchState} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, graceSeconds: number): {state: State} | null;
     }
 
     /**
      * Match signal function definition.
      */
-    export interface MatchSignalFunction {
+    export interface MatchSignalFunction<State = MatchState> {
         /**
          * User match leave function definition.
          * @param ctx - The context for the execution.
@@ -924,7 +926,7 @@ declare namespace nkruntime {
          * @param data - Arbitrary data the signal caller is sending to the match signal handler.
          * @returns object with state and optional response data string to the signal caller.
          */
-        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: MatchState, data: string): {state: MatchState, data?: string} | null;
+        (ctx: Context, logger: Logger, nk: Nakama, dispatcher: MatchDispatcher, tick: number, state: State, data: string): {state: State, data?: string} | null;
     }
 
     /**
@@ -1046,9 +1048,9 @@ declare namespace nkruntime {
         registerBeforeAuthenticateEmail(fn: BeforeHookFunction<AuthenticateEmailRequest>): void;
 
         /**
-         * Register after Hook for RPC uthenticateEmail function.
+         * Register after Hook for RPC AuthenticateEmail function.
          *
-         * @param fn - The function to execute after uthenticateEmail.
+         * @param fn - The function to execute after AuthenticateEmail.
          * @throws {TypeError}
          */
         registerAfterAuthenticateEmail(fn: AfterHookFunction<Session, AuthenticateEmailRequest>): void;
@@ -2083,7 +2085,7 @@ declare namespace nkruntime {
          * @param name - Identifier of the match handler.
          * @param functions - Object containing the match handler functions.
          */
-        registerMatch(name: string, functions: MatchHandler): void;
+        registerMatch<State = MatchState>(name: string, functions: MatchHandler<State>): void;
 
         /**
          * Register matchmaker matched handler.
@@ -2326,6 +2328,7 @@ declare namespace nkruntime {
         matchId: string;
         authoritative: boolean;
         size: number;
+        label: string;
     }
 
     /**
@@ -2415,7 +2418,7 @@ declare namespace nkruntime {
     export interface StorageWriteRequest {
         key: string;
         collection: string;
-        userId: string;
+        userId: string | undefined;
         value: {[key: string]: any};
         version?: string;
         permissionRead?: ReadPermissionValues;
@@ -2521,6 +2524,7 @@ declare namespace nkruntime {
         maxCount: number;
         createTime: number;
         updateTime: number;
+        metadata: {[key: string]: any};
     }
 
     export interface UserGroupList {
@@ -2661,6 +2665,7 @@ declare namespace nkruntime {
         query: string
         stringProperties: {[key: string]: string}
         numericProperties: {[key: string]: number}
+        countMultiple: number
     }
 
     export interface EnvelopeMatchmakerAdd {
@@ -2752,7 +2757,7 @@ declare namespace nkruntime {
         purchaseTime: string
         createTime: string
         updateTime: string
-        providerPayload: string
+        providerResponse: string
         environment: ValidatedPurchaseEnvironment
         seenBefore: boolean
     }
@@ -2816,6 +2821,37 @@ declare namespace nkruntime {
          * @throws {TypeError}
          */
         event(eventName: string, properties: {[key: string]: string}, timestamp?: number, external?: boolean): void;
+
+        /**
+         * Add a custom metrics counter.
+         *
+         * @param name - The name of the custom metrics counter.
+         * @param tags - The metrics tags associated with this counter.
+         * @param delta - An integer value to update this metric with.
+         * @throws {TypeError}
+         */
+        metricsCounterAdd(name: string, tags: {[key: string]: string}, delta: number): void;
+
+        /**
+         * Add a custom metrics gauge.
+         *
+         * @param name - The name of the custom metrics gauge.
+         * @param tags - The metrics tags associated with this gauge.
+         * @param value - A value to update this metric with.
+         * @throws {TypeError}
+         */
+        metricsGaugeSet(name: string, tags: {[key: string]: string}, value: number): void;
+
+
+        /**
+         * Add a custom metrics timer.
+         *
+         * @param name - The name of the custom metrics timer.
+         * @param tags - The metrics tags associated with this timer.
+         * @param value - An integer value to update this metric with (in nanoseconds).
+         * @throws {TypeError}
+         */
+        metricsTimerRecord(name: string, tags: {[key: string]: string}, value: number): void;
 
         /**
          * Generate a new UUID v4.
@@ -3546,7 +3582,17 @@ declare namespace nkruntime {
          * @param sessionID - Opt. Presence disconnect reason.
          * @throws {TypeError, GoError}
          */
-        sessionDisconnect(sessionID: string, reason?: PresenceReason): void;
+         sessionDisconnect(sessionID: string, reason?: PresenceReason): void;
+
+        /**
+         * Log out a user from their current session.
+         *
+         * @param userId - The ID of the user to be logged out.
+         * @param token - Opt. The current session authentication token.
+         * @param refreshToken - Opt. The current session refresh token.
+         * @throws {TypeError, GoError}
+         */
+         sessionLogout(userId: string, token?: string, refreshToken?:string): void;
 
         /**
          * Create a new match.
@@ -3592,7 +3638,7 @@ declare namespace nkruntime {
         matchSignal(id: string, data: string): string
 
 
-      /**
+        /**
          * Send a notification.
          *
          * @param userId - User ID.
@@ -3612,6 +3658,17 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         notificationsSend(notifications: NotificationRequest[]): void;
+
+        /**
+         * Send an in-app notification to all users.
+         *
+         * @param subject - Subject of the notification.
+         * @param content - Key value object to send as the notification content.
+         * @param code - Custom code for the notification. Must be a positive integer.
+         * @param persistent - Opt. A non-persistent message will only be received by a client which is currently connected to the server. Defaults to false.
+         * @throws {TypeError, GoError}
+         */
+        notificationSendAll(subject: string, content: {[key: string]: any}, code: number, persistent?: boolean): void;
 
         /**
          * Update user wallet.
@@ -3793,6 +3850,18 @@ declare namespace nkruntime {
         leaderboardsGetId(leaderboardIds: string[]): Leaderboard[];
 
         /**
+         * Fetch the list of leaderboard records around the owner.
+         *
+         * @param leaderboardId - The unique identifier for the leaderboard.
+         * @param ownerId - The owner of the score to list records around. Mandatory field.
+         * @param limit - Return only the required number of leaderboard records denoted by this limit value.
+         * @param overrideExpiry - Records with expiry in the past are not returned unless within this defined limit. Must be equal or greater than 0.
+         * @returns The leaderboard records according to ID.
+         * @throws {TypeError, GoError}
+         */
+        leaderboardRecordsHaystack(leaderboardId: string, ownerId: string, limit: number, overrideExpiry: number): LeaderboardRecordList[];
+
+        /**
          * Create a new tournament.
          *
          * @param tournamentID - Tournament id.
@@ -3817,7 +3886,7 @@ declare namespace nkruntime {
             authoritative: boolean,
             sortOrder: SortOrder,
             operator: Operator,
-            duration: number,
+            duration?: number,
             resetSchedule?: string | null,
             metadata?: {[key: string]: any} | null,
             title?: string | null,
@@ -4028,6 +4097,39 @@ declare namespace nkruntime {
         friendsList(userId: string, limit?: number, state?: number, cursor?: string): FriendList;
 
         /**
+         * Add friends to a user.
+         *
+         * @param userId - User ID.
+         * @param username - Username.
+         * @param ids - The IDs of the users you want to add as friends.
+         * @param usernames - The usernames of the users you want to add as friends.
+         * @throws {TypeError, GoError}
+         */
+        friendsAdd(userId: string, username: string, ids: string[], usernames: string[]): FriendList;
+
+        /**
+         * Delete friends from a user.
+         *
+         * @param userId - User ID.
+         * @param username - Username.
+         * @param ids - The IDs of the users you want to delete as friends.
+         * @param usernames - The usernames of the users you want to delete as friends.
+         * @throws {TypeError, GoError}
+         */
+        friendsDelete(userId: string, username: string, ids: string[], usernames: string[]): FriendList;
+
+        /**
+         * Block friends for a user.
+         *
+         * @param userId - User ID.
+         * @param username - Username.
+         * @param ids - The IDs of the users you want to block as friends.
+         * @param usernames - The usernames of the users you want to block as friends.
+         * @throws {TypeError, GoError}
+         */
+        friendsBlock(userId: string, username: string, ids: string[], usernames: string[]): FriendList;
+
+        /**
          * Join a user to a group.
          *
          * @param groupID - Group ID.
@@ -4056,6 +4158,16 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         groupUsersAdd(groupID: string, userIds: string[], callerID?: string): void;
+
+        /**
+         * Ban multiple users from a group.
+         *
+         * @param groupID - Group ID.
+         * @param userIds - Array of userIds to ban from the group.
+         * @param callerID - Opt. User ID mandating the operation to check for sufficient priviledges. Defaults to admin user if empty.
+         * @throws {TypeError, GoError}
+         */
+         groupUsersBan(groupID: string, userIds: string[], callerID?: string): void;
 
         /**
          * Promote users in a group.
@@ -4099,31 +4211,36 @@ declare namespace nkruntime {
          *
          * @param userID - User ID.
          * @param receipt - Apple receipt to validate.
+         * @param persist - Opt. Whether to persist the receipt validation. Defaults to true.
          * @param passwordOverride - Opt. Override the configured Apple Store Validation Password.
          * @returns The result of the validated and stored purchases from the receipt.
          * @throws {TypeError, GoError}
          */
-        purchaseValidateApple(userID: string, receipt: string, passwordOverride?: string): ValidatePurchaseResponse
+        purchaseValidateApple(userID: string, receipt: string, persist?: boolean, passwordOverride?: string): ValidatePurchaseResponse
 
         /**
          * Validate a Google purchase payload.
          *
          * @param userID - User ID.
          * @param purchase - Google purchase payload to validate.
+         * @param persist - Opt. Whether to persist the receipt validation. Defaults to true.
+         * @param clientEmailOverride - Opt. Override the configured Google Service Account client email.
+         * @param privateKeyOverride - Opt. Override the configured Google Service Account private key.
          * @returns The result of the validated and stored purchases from the receipt.
          * @throws {TypeError, GoError}
          */
-         purchaseValidateGoogle(userID: string, purchase: string): ValidatePurchaseResponse
+         purchaseValidateGoogle(userID: string, purchase: string, persist?: boolean, clientEmailOverride?: string, privateKeyOverride?: string): ValidatePurchaseResponse
 
         /**
          * Validate a Huawei purchase payload.
          *
          * @param userID - User ID.
          * @param receipt - Apple receipt to validate.
+         * @param persist - Opt. Whether to persist the receipt validation. Defaults to true.
          * @returns The result of the validated and stored purchases from the receipt.
          * @throws {TypeError, GoError}
          */
-        purchaseValidateHuawei(userID: string, receipt: string, signature: string): ValidatePurchaseResponse
+        purchaseValidateHuawei(userID: string, receipt: string, signature: string, persist?: boolean): ValidatePurchaseResponse
 
         /**
          * Get a validated purchase data by transaction ID.
@@ -4173,14 +4290,37 @@ declare namespace nkruntime {
          channelMessageUpdate(channelId: string, messageId: string, content?: {[key: string]: any}, senderId?: string, senderUsername?: string, persist?: boolean): ChannelMessageSendAck
 
         /**
+         * List channel messages.
+         *
+         * @param channelId - Channel ID.
+         * @param limit - The number of messages to return per page.
+         * @param forward - Whether to list messages from oldest to newest, or newest to oldest.
+         * @param cursor - Opt. Pagination cursor.
+         * @returns List of channel messages.
+         * @throws {TypeError, GoError}
+         */
+         channelMessagesList(channelId: string, limit?: number, forward?: boolean, cursor?: string): ChannelMessageList
+
+        /**
          * Send channel message.
          *
+         * @param sender - The user ID of the sender.
          * @param target - The user ID to DM with, group ID to chat with, or room channel name to join.
          * @param type - Channel type.
          * @returns The channelId.
          * @throws {TypeError, GoError}
          */
-        channelIdBuild(target: string, chanType: ChanType): string
+        channelIdBuild(sender: string, target: string, chanType: ChanType): string
+
+        /**
+         * Parses a CRON expression and a timestamp in UTC seconds, and returns the next matching timestamp in UTC seconds.
+         *
+         * @param cron - The cron expression.
+         * @param timestamp - UTC unix seconds timestamp.
+         * @returns The next cron matching timestamp in UTC seconds.
+         * @throws {TypeError, GoError}
+         */
+         cronNext(cron: string, timestamp: number): number
     }
 
     /**

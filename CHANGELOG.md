@@ -3,6 +3,22 @@ All notable changes to this project are documented below.
 
 The format is based on [keep a changelog](http://keepachangelog.com) and this project uses [semantic versioning](http://semver.org).
 
+## [1.24.0] - 2022-08-18
+### Added
+- New subscription validation functions for Apple and Google in the runtimes.
+- Add "NotificationsDelete" function to the runtimes.
+- Add const field for easier access to system user ID in TypeScript definition.
+
+### Changed
+- Return a cursor with "leaderboardRecordsHaystack" function.
+- Use ArrayBuffer type instead of Uint8Array in JavaScript runtime. Thanks @formatCvt.
+- Expose optional "recorded" param to "accountDeleteId" in TypeScript definition.
+
+### Fixed
+- Fix function signature of "leaderboardRecordsHaystack" in TypeScript definition.
+- Fix signature of "authenticateGameCenter" in TypeScript definition.
+- Update field name used in Friend type in TypeScript definition.
+
 ## [1.23.0] - 2022-05-22
 ### Added
 - Add custom metrics publishing functions to Lua and JavaScript runtimes.
@@ -13,9 +29,9 @@ The format is based on [keep a changelog](http://keepachangelog.com) and this pr
 
 ### Changed
 - Update naming of delete notifications before/after hook registration functions.
-- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions.
+- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions. 
 
-### Fixed
+### Fixed
 - Rename field in "ValidatedPurchase" to "providerResponse" to match what the server returns.
 - Add missing "label" field to "Match" TypeScript definition.
 
@@ -38,7 +54,7 @@ The format is based on [keep a changelog](http://keepachangelog.com) and this pr
 
 ### Changed
 - JavaScript runtime match data changed to use Uint8Array type.
-- Added IAP validation `persist` parameter to make persistence optional. 
+- Added IAP validation `persist` parameter to make persistence optional.
 
 ## [1.20.0] - 2021-10-29
 ### Added

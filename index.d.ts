@@ -14,6 +14,9 @@
 
 declare namespace nkruntime {
 
+    // System User
+    const SystemUserId = "00000000-0000-0000-0000-000000000000";
+
     /**
      * The context of the current execution; used to observe and pass on cancellation signals.
      */
@@ -241,7 +244,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessage(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
+        broadcastMessage(opcode: number, data?: ArrayBuffer | string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
 
         /**
          * Defer message broadcast to match presences.
@@ -253,7 +256,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessageDeferred(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
+        broadcastMessageDeferred(opcode: number, data?: ArrayBuffer | string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
 
         /**
          * Kick presences from match.
@@ -282,7 +285,7 @@ declare namespace nkruntime {
         persistence: boolean;
         status: string;
         opCode: number;
-        data: Uint8Array;
+        data: ArrayBuffer;
         reliable: boolean;
         receiveTime: number;
     }
@@ -412,8 +415,8 @@ declare namespace nkruntime {
         senderId?: string
         username?: string
         content?: string
-        createTime?: string
-        updateTime?: string
+        createTime?: number
+        updateTime?: number
         persistent?: boolean
         roomName?: string
         groupId?: string
@@ -700,7 +703,7 @@ declare namespace nkruntime {
     export interface Session {
         created?: boolean
         token?: string
-        refresh_token?: string
+        refreshToken?: string
     }
 
     export interface ChannelMessageList {
@@ -713,7 +716,7 @@ declare namespace nkruntime {
     export interface Friend {
         user?: User
         state?: number
-        updateTime?: string
+        updateTime?: number
     }
 
     export interface FriendList {
@@ -2032,6 +2035,24 @@ declare namespace nkruntime {
          registerAfterValidatePurchaseApple(fn: AfterHookFunction<ValidatePurchaseResponse, ValidatePurchaseAppleRequest>): void;
 
         /**
+         * Register before Hook for RPC ValidateSubscriptionApple function.
+         *
+         * @param fn - The function to execute before ValidatePurchaseApple.
+         * @throws {TypeError}
+         */
+        registerBeforeValidateSubscriptionApple(fn: BeforeHookFunction<ValidateSubscriptionAppleRequest>): void;
+
+        /**
+         * Register after Hook for RPC ValidatePurchaseApple function.
+         *
+         * @param fn - The function to execute after ValidatePurchaseApple.
+         * @throws {TypeError}
+         */
+        registerAfterValidateSubscriptionApple(fn: AfterHookFunction<ValidateSubscriptionResponse, ValidateSubscriptionAppleRequest>): void;
+
+
+
+        /**
          * Register before Hook for RPC ValidatePurchaseGoogle function.
          *
          * @param fn - The function to execute before ValidatePurchaseGoogle.
@@ -2046,6 +2067,22 @@ declare namespace nkruntime {
          * @throws {TypeError}
          */
          registerAfterValidatePurchaseGoogle(fn: AfterHookFunction<ValidatePurchaseResponse, ValidatePurchaseGoogleRequest>): void;
+
+        /**
+         * Register before Hook for RPC ValidatePurchaseGoogle function.
+         *
+         * @param fn - The function to execute before ValidatePurchaseGoogle.
+         * @throws {TypeError}
+         */
+        registerBeforeValidatePurchaseGoogle(fn: BeforeHookFunction<ValidateSubscriptionGoogleRequest>): void;
+
+        /**
+         * Register after Hook for RPC ValidatePurchaseGoogle function.
+         *
+         * @param fn - The function to execute after ValidatePurchaseGoogle.
+         * @throws {TypeError}
+         */
+        registerAfterValidatePurchaseGoogle(fn: AfterHookFunction<ValidateSubscriptionResponse, ValidateSubscriptionGoogleRequest>): void;
 
         /**
          * Register before Hook for RPC ValidatePurchaseHuawei function.
@@ -2340,6 +2377,11 @@ declare namespace nkruntime {
         persistent: boolean;
         senderId: string;
         subject: string;
+        userId: string;
+    }
+
+    export interface NotificationDeleteRequest {
+        notificationId: string;
         userId: string;
     }
 
@@ -2728,8 +2770,16 @@ declare namespace nkruntime {
         receipt: string
     }
 
+    export interface ValidateSubscriptionAppleRequest {
+        receipt: string
+    }
+
     export interface ValidatePurchaseGoogleRequest {
         purchase: string
+    }
+
+    export interface ValidateSubscriptionGoogleRequest {
+        receipt: string
     }
 
     export interface ValidatePurchaseHuaweiRequest {
@@ -2741,9 +2791,18 @@ declare namespace nkruntime {
         validatedPurchases?: ValidatedPurchase[]
     }
 
+    export interface ValidateSubscriptionResponse {
+        validatedSubscription: ValidatedSubscription
+    }
+
     export interface ValidatedPurchaseOwner {
-        validatedPurchase: ValidatedPurchase,
-        userId: string,
+        validatedPurchase: ValidatedPurchase
+        userId: string
+    }
+
+    export interface ValidatedSubscriptionOwner {
+      validatedSubscription: ValidatedSubscription
+      userId: string
     }
 
     export type ValidatedPurchaseStore = "APPLE_APP_STORE" | "GOOGLE_PLAY_STORE" | "HUAWEI_APP_GALLERY"
@@ -2754,17 +2813,36 @@ declare namespace nkruntime {
         productId: string
         transactionId: string
         store: ValidatedPurchaseStore
-        purchaseTime: string
-        createTime: string
-        updateTime: string
+        purchaseTime: number
+        createTime: number
+        updateTime: number
         providerResponse: string
         environment: ValidatedPurchaseEnvironment
         seenBefore: boolean
     }
 
+    export interface ValidatedSubscription {
+        productId: string
+        originalTransactionId: string
+        store: ValidatedPurchaseStore
+        purchaseTime: number
+        createTime: number
+        updateTime: number
+        environment: ValidatedPurchaseEnvironment
+        expiryTime: string
+        active: boolean
+    }
+
     export interface ValidatedPurchaseList {
         validatedPurchases?: ValidatedPurchase[]
         cursor?: string
+        prevCursor?: string
+    }
+
+    export interface ValidatedSubscriptionList {
+        validatedSubscription?: ValidatedSubscription
+        cursor?: string
+        prevCursor?: string
     }
 
     export interface ChannelMessageSendAck {
@@ -2801,7 +2879,7 @@ declare namespace nkruntime {
          * @param data - Data to convert to string.
          * @throws {TypeError}
          */
-         binaryToString(data: Uint8Array): string;
+         binaryToString(data: ArrayBuffer): string;
 
         /**
          * Convert a string to binary data.
@@ -2809,7 +2887,7 @@ declare namespace nkruntime {
          * @param str - String to convert to binary data.
          * @throws {TypeError}
          */
-         stringToBinary(str: string): Uint8Array;
+         stringToBinary(str: string): ArrayBuffer;
 
         /**
          * Emit an event to be processed.
@@ -2902,7 +2980,7 @@ declare namespace nkruntime {
          *
          * @throws {TypeError}
          */
-        base64Encode(s: string, padding?: boolean): string;
+        base64Encode(s: string | ArrayBuffer, padding?: boolean): string;
 
         /**
          * Base 64 Decode
@@ -3036,7 +3114,7 @@ declare namespace nkruntime {
          * @returns HMAC SHA256.
          * @throws {TypeError, GoError}
          */
-        hmacSha256Hash(input: string, key: string): string;
+        hmacSha256Hash(input: string, key: string): ArrayBuffer;
 
         /**
          * BCrypt hash of a password
@@ -3139,7 +3217,7 @@ declare namespace nkruntime {
          * @returns Object with authenticated user data.
          * @throws {TypeError, GoError}
          */
-        authenticateGamecenter(
+        authenticateGameCenter(
             playerId: string,
             bundleId: string,
             ts: number,
@@ -3220,9 +3298,10 @@ declare namespace nkruntime {
          * Delete user account
          *
          * @param userId - Target account.
+         * @param recorded - Opt. Whether to record this deletion in the database. Defaults to false.
          * @throws {TypeError, GoError}
          */
-        accountDeleteId(userId: string): void;
+        accountDeleteId(userId: string, recorded?: boolean): void;
 
         /**
          * Export user account data to JSON encoded string
@@ -3671,6 +3750,14 @@ declare namespace nkruntime {
         notificationSendAll(subject: string, content: {[key: string]: any}, code: number, persistent?: boolean): void;
 
         /**
+         * Delete multiple notifications.
+         *
+         * @param notifications - Array of notifications to delete.
+         * @throws {TypeError, GoError}
+         */
+        notificationsDelete(notifications: NotificationDeleteRequest[]): void;
+
+        /**
          * Update user wallet.
          *
          * @param userId - User ID.
@@ -3855,11 +3942,12 @@ declare namespace nkruntime {
          * @param leaderboardId - The unique identifier for the leaderboard.
          * @param ownerId - The owner of the score to list records around. Mandatory field.
          * @param limit - Return only the required number of leaderboard records denoted by this limit value.
+         * @param cursor - Page cursor.
          * @param overrideExpiry - Records with expiry in the past are not returned unless within this defined limit. Must be equal or greater than 0.
          * @returns The leaderboard records according to ID.
          * @throws {TypeError, GoError}
          */
-        leaderboardRecordsHaystack(leaderboardId: string, ownerId: string, limit: number, overrideExpiry: number): LeaderboardRecordList[];
+        leaderboardRecordsHaystack(leaderboardId: string, ownerId: string, limit: number, cursor: string, overrideExpiry: number): LeaderboardRecordList;
 
         /**
          * Create a new tournament.
@@ -3986,11 +4074,12 @@ declare namespace nkruntime {
          * @param id - The unique identifier for the leaderboard to submit to. Mandatory field.
          * @param ownerId - The owner of this score submission. Mandatory field.
          * @param limit - Opt. The owner username of this score submission, if it's a user.
+         * @param cursor - Page cursor.
          * @param expiry - Opt. Expiry Unix epoch.
          * @returns The tournament data for the given ids.
          * @throws {TypeError, GoError}
          */
-        tournamentRecordsHaystack(id: string, ownerId: string, limit?: number, expiry?: number): Tournament[];
+        tournamentRecordsHaystack(id: string, ownerId: string, limit?: number, cursor?: string, expiry?: number): TournamentRecordList;
 
         /**
          * Create a new group.
@@ -4250,6 +4339,52 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         purchaseGetByTransactionId(transactionID: string): ValidatedPurchaseOwner
+
+        /**
+         * List validated and stored purchases.
+         *
+         * @param userID - Opt. User ID.
+         * @param limit - Opt. Limit of results per page. Must be a value between 1 and 100.
+         * @param cursor - Opt. A cursor used to fetch the next page when applicable.
+         * @returns A page of validated and stored purchases.
+         * @throws {TypeError, GoError}
+         */
+        purchasesList(userID?: string, limit?: number, cursor?: string): ValidatedPurchaseList
+
+        /**
+         * Validate an Apple receipt containing a subscription.
+         *
+         * @param userID - User ID.
+         * @param receipt - Apple subscription receipt to validate.
+         * @param persist - Opt. Whether to persist the subscription validation. Defaults to true.
+         * @param passwordOverride - Opt. Override the configured Apple Store Validation Password.
+         * @returns The result of the validated and stored purchases from the receipt.
+         * @throws {TypeError, GoError}
+         */
+        subscriptionValidateApple(userID: string, receipt: string, persist?: boolean, passwordOverride?: string): ValidateSubscriptionResponse
+
+        /**
+         * Validate a Google receipt containing a subscription.
+         *
+         * @param userID - User ID.
+         * @param subscription - Google subscription payload to validate.
+         * @param persist - Opt. Whether to persist the subscription receipt validation. Defaults to true.
+         * @param clientEmailOverride - Opt. Override the configured Google Service Account client email.
+         * @param privateKeyOverride - Opt. Override the configured Google Service Account private key.
+         * @returns The result of the validated and stored purchases from the receipt.
+         * @throws {TypeError, GoError}
+         */
+        subscriptionValidateGoogle(userID: string, subscription: string, persist?: boolean, clientEmailOverride?: string, privateKeyOverride?: string): ValidateSubscriptionResponse
+
+        /**
+         * Get a validated subscription data by product ID.
+         *
+         * @param userID - User ID.
+         * @param productID - Product ID. For Google this is the subscriptionToken value of the purchase data.
+         * @returns The data of the validated and stored purchase.
+         * @throws {TypeError, GoError}
+         */
+        subscriptionGetByProductId(userID: string, productID: string): ValidatedPurchaseOwner
 
         /**
          * List validated and stored purchases.

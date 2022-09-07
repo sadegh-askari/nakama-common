@@ -14,6 +14,9 @@
 
 declare namespace nkruntime {
 
+    // System User
+    const SystemUserId = "00000000-0000-0000-0000-000000000000";
+
     /**
      * The context of the current execution; used to observe and pass on cancellation signals.
      */
@@ -241,7 +244,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessage(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
+        broadcastMessage(opcode: number, data?: ArrayBuffer | string | null, presences?: Presence[] | null, sender?: Presence | null, reliable?: boolean): void;
 
         /**
          * Defer message broadcast to match presences.
@@ -253,7 +256,7 @@ declare namespace nkruntime {
          * @param reliable - Opt. Broadcast the message with delivery guarantees or not. Defaults to true.
          * @throws {TypeError, GoError}
          */
-        broadcastMessageDeferred(opcode: number, data?: Uint8Array | string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
+        broadcastMessageDeferred(opcode: number, data?: ArrayBuffer | string | null, presences?: Presence[] | null, sender?: Presence, reliable?: boolean): void;
 
         /**
          * Kick presences from match.
@@ -282,7 +285,7 @@ declare namespace nkruntime {
         persistence: boolean;
         status: string;
         opCode: number;
-        data: Uint8Array;
+        data: ArrayBuffer;
         reliable: boolean;
         receiveTime: number;
     }
@@ -412,8 +415,8 @@ declare namespace nkruntime {
         senderId?: string
         username?: string
         content?: string
-        createTime?: string
-        updateTime?: string
+        createTime?: number
+        updateTime?: number
         persistent?: boolean
         roomName?: string
         groupId?: string
@@ -700,7 +703,7 @@ declare namespace nkruntime {
     export interface Session {
         created?: boolean
         token?: string
-        refresh_token?: string
+        refreshToken?: string
     }
 
     export interface ChannelMessageList {
@@ -713,7 +716,7 @@ declare namespace nkruntime {
     export interface Friend {
         user?: User
         state?: number
-        updateTime?: string
+        updateTime?: number
     }
 
     export interface FriendList {
@@ -2377,6 +2380,11 @@ declare namespace nkruntime {
         userId: string;
     }
 
+    export interface NotificationDeleteRequest {
+        notificationId: string;
+        userId: string;
+    }
+
     export interface NotificationRequest {
         code: number;
         content: {[key: string]: any};
@@ -2805,9 +2813,9 @@ declare namespace nkruntime {
         productId: string
         transactionId: string
         store: ValidatedPurchaseStore
-        purchaseTime: string
-        createTime: string
-        updateTime: string
+        purchaseTime: number
+        createTime: number
+        updateTime: number
         providerResponse: string
         environment: ValidatedPurchaseEnvironment
         seenBefore: boolean
@@ -2817,9 +2825,9 @@ declare namespace nkruntime {
         productId: string
         originalTransactionId: string
         store: ValidatedPurchaseStore
-        purchaseTime: string
-        createTime: string
-        updateTime: string
+        purchaseTime: number
+        createTime: number
+        updateTime: number
         environment: ValidatedPurchaseEnvironment
         expiryTime: string
         active: boolean
@@ -2871,7 +2879,7 @@ declare namespace nkruntime {
          * @param data - Data to convert to string.
          * @throws {TypeError}
          */
-         binaryToString(data: Uint8Array): string;
+         binaryToString(data: ArrayBuffer): string;
 
         /**
          * Convert a string to binary data.
@@ -2879,7 +2887,7 @@ declare namespace nkruntime {
          * @param str - String to convert to binary data.
          * @throws {TypeError}
          */
-         stringToBinary(str: string): Uint8Array;
+         stringToBinary(str: string): ArrayBuffer;
 
         /**
          * Emit an event to be processed.
@@ -2972,7 +2980,7 @@ declare namespace nkruntime {
          *
          * @throws {TypeError}
          */
-        base64Encode(s: string, padding?: boolean): string;
+        base64Encode(s: string | ArrayBuffer, padding?: boolean): string;
 
         /**
          * Base 64 Decode
@@ -3106,7 +3114,7 @@ declare namespace nkruntime {
          * @returns HMAC SHA256.
          * @throws {TypeError, GoError}
          */
-        hmacSha256Hash(input: string, key: string): string;
+        hmacSha256Hash(input: string, key: string): ArrayBuffer;
 
         /**
          * BCrypt hash of a password
@@ -3209,7 +3217,7 @@ declare namespace nkruntime {
          * @returns Object with authenticated user data.
          * @throws {TypeError, GoError}
          */
-        authenticateGamecenter(
+        authenticateGameCenter(
             playerId: string,
             bundleId: string,
             ts: number,
@@ -3290,9 +3298,10 @@ declare namespace nkruntime {
          * Delete user account
          *
          * @param userId - Target account.
+         * @param recorded - Opt. Whether to record this deletion in the database. Defaults to false.
          * @throws {TypeError, GoError}
          */
-        accountDeleteId(userId: string): void;
+        accountDeleteId(userId: string, recorded?: boolean): void;
 
         /**
          * Export user account data to JSON encoded string
@@ -3741,6 +3750,14 @@ declare namespace nkruntime {
         notificationSendAll(subject: string, content: {[key: string]: any}, code: number, persistent?: boolean): void;
 
         /**
+         * Delete multiple notifications.
+         *
+         * @param notifications - Array of notifications to delete.
+         * @throws {TypeError, GoError}
+         */
+        notificationsDelete(notifications: NotificationDeleteRequest[]): void;
+
+        /**
          * Update user wallet.
          *
          * @param userId - User ID.
@@ -3925,11 +3942,12 @@ declare namespace nkruntime {
          * @param leaderboardId - The unique identifier for the leaderboard.
          * @param ownerId - The owner of the score to list records around. Mandatory field.
          * @param limit - Return only the required number of leaderboard records denoted by this limit value.
+         * @param cursor - Page cursor.
          * @param overrideExpiry - Records with expiry in the past are not returned unless within this defined limit. Must be equal or greater than 0.
          * @returns The leaderboard records according to ID.
          * @throws {TypeError, GoError}
          */
-        leaderboardRecordsHaystack(leaderboardId: string, ownerId: string, limit: number, overrideExpiry: number): LeaderboardRecordList[];
+        leaderboardRecordsHaystack(leaderboardId: string, ownerId: string, limit: number, cursor: string, overrideExpiry: number): LeaderboardRecordList;
 
         /**
          * Create a new tournament.
@@ -4056,11 +4074,12 @@ declare namespace nkruntime {
          * @param id - The unique identifier for the leaderboard to submit to. Mandatory field.
          * @param ownerId - The owner of this score submission. Mandatory field.
          * @param limit - Opt. The owner username of this score submission, if it's a user.
+         * @param cursor - Page cursor.
          * @param expiry - Opt. Expiry Unix epoch.
          * @returns The tournament data for the given ids.
          * @throws {TypeError, GoError}
          */
-        tournamentRecordsHaystack(id: string, ownerId: string, limit?: number, expiry?: number): Tournament[];
+        tournamentRecordsHaystack(id: string, ownerId: string, limit?: number, cursor?: string, expiry?: number): TournamentRecordList;
 
         /**
          * Create a new group.

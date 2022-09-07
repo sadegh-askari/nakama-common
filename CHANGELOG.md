@@ -4,8 +4,23 @@ All notable changes to this project are documented below.
 The format is based on [keep a changelog](http://keepachangelog.com) and this project uses [semantic versioning](http://semver.org).
 
 ## [Unreleased]
+
+
+## [1.24.0] - 2022-08-18
 ### Added
-- Add subscription validation APIs and runtime functions for Google and Apple.
+- New subscription validation functions for Apple and Google in the runtimes.
+- Add "NotificationsDelete" function to the runtimes.
+- Add const field for easier access to system user ID in TypeScript definition.
+
+### Changed
+- Return a cursor with "leaderboardRecordsHaystack" function.
+- Use ArrayBuffer type instead of Uint8Array in JavaScript runtime. Thanks @formatCvt.
+- Expose optional "recorded" param to "accountDeleteId" in TypeScript definition.
+
+### Fixed
+- Fix function signature of "leaderboardRecordsHaystack" in TypeScript definition.
+- Fix signature of "authenticateGameCenter" in TypeScript definition.
+- Update field name used in Friend type in TypeScript definition.
 
 ## [1.23.0] - 2022-05-22
 ### Added
@@ -17,7 +32,7 @@ The format is based on [keep a changelog](http://keepachangelog.com) and this pr
 
 ### Changed
 - Update naming of delete notifications before/after hook registration functions.
-- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions.
+- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions. 
 
 ### Fixed
 - Rename field in "ValidatedPurchase" to "providerResponse" to match what the server returns.

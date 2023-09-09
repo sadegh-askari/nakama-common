@@ -24,6 +24,7 @@ declare namespace nkruntime {
         env: {[key: string]: string},
         executionMode: string,
         node: string,
+        version: string,
         headers: {[key: string]: string[]},
         queryParams: {[key: string]: string[]},
         userId: string,
@@ -49,21 +50,37 @@ declare namespace nkruntime {
      * These errors map to HTTP status codes as shown here: https://github.com/grpc/grpc/blob/master/doc/http-grpc-status-mapping.md/.
      */
     const enum Codes {
+        // HTTP Mapping: 499 Client Closed Request
         CANCELLED = 1, // The operation was cancelled, typically by the caller.
+        // HTTP Mapping: 500 Internal Server Error
         UNKNOWN = 2, // Unknown error. For example, this error may be returned when a Status value received from another address space belongs to an error space that is not known in this address space. Also errors raised by APIs that do not return enough error information may be converted to this error.
+        // HTTP Mapping: 400 Bad Request
         INVALID_ARGUMENT = 3, // The client specified an invalid argument. Note that this differs from FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are problematic regardless of the state of the system (e.g., a malformed file name).
+        // HTTP Mapping: 504 Gateway Timeout
         DEADLINE_EXCEEDED = 4, // The deadline expired before the operation could complete. For operations that change the state of the system, this error may be returned even if the operation has completed successfully. For example, a successful response from a server could have been delayed long
+        // HTTP Mapping: 404 Not Found
         NOT_FOUND = 5, // Some requested entity (e.g., file or directory) was not found. Note to server developers: if a request is denied for an entire class of users, such as gradual feature rollout or undocumented allowlist, NOT_FOUND may be used. If a request is denied for some users within a class of users, such as user-based access control, PERMISSION_DENIED must be used.
+        // HTTP Mapping: 409 Conflict
         ALREADY_EXISTS = 6, // The entity that a client attempted to create (e.g., file or directory) already exists.
+        // HTTP Mapping: 403 Forbidden
         PERMISSION_DENIED = 7, // The caller does not have permission to execute the specified operation. PERMISSION_DENIED must not be used for rejections caused by exhausting some resource (use RESOURCE_EXHAUSTED instead for those errors). PERMISSION_DENIED must not be used if the caller can not be identified (use UNAUTHENTICATED instead for those errors). This error code does not imply the request is valid or the requested entity exists or satisfies other pre-conditions.
+        // HTTP Mapping: 429 Too Many Requests
         RESOURCE_EXHAUSTED = 8, // Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.
+        // HTTP Mapping: 400 Bad Request
         FAILED_PRECONDITION = 9, // The operation was rejected because the system is not in a state required for the operation's execution. For example, the directory to be deleted is non-empty, an rmdir operation is applied to a non-directory, etc. Service implementors can use the following guidelines to decide between FAILED_PRECONDITION, ABORTED, and UNAVAILABLE: (a) Use UNAVAILABLE if the client can retry just the failing call. (b) Use ABORTED if the client should retry at a higher level (e.g., when a client-specified test-and-set fails, indicating the client should restart a read-modify-write sequence). (c) Use FAILED_PRECONDITION if the client should not retry until the system state has been explicitly fixed. E.g., if an "rmdir" fails because the directory is non-empty, FAILED_PRECONDITION should be returned since the client should not retry unless the files are deleted from the directory.
+        // HTTP Mapping: 409 Conflict
         ABORTED = 10, // The operation was aborted, typically due to a concurrency issue such as a sequencer check failure or transaction abort. See the guidelines above for deciding between FAILED_PRECONDITION, ABORTED, and UNAVAILABLE.
+        // HTTP Mapping: 400 Bad Request
         OUT_OF_RANGE = 11, // The operation was attempted past the valid range. E.g., seeking or reading past end-of-file. Unlike INVALID_ARGUMENT, this error indicates a problem that may be fixed if the system state changes. For example, a 32-bit file system will generate INVALID_ARGUMENT if asked to read at an offset that is not in the range [0,2^32-1], but it will generate OUT_OF_RANGE if asked to read from an offset past the current file size. There is a fair bit of overlap between FAILED_PRECONDITION and OUT_OF_RANGE. We recommend using OUT_OF_RANGE (the more specific error) when it applies so that callers who are iterating through a space can easily look for an OUT_OF_RANGE error to detect when they are done.
+        // HTTP Mapping: 501 Not Implemented
         UNIMPLEMENTED = 12, // The operation is not implemented or is not supported/enabled in this service.
+        // HTTP Mapping: 500 Internal Server Error
         INTERNAL = 13, // Internal errors. This means that some invariants expected by the underlying system have been broken. This error code is reserved for serious errors.
+        // HTTP Mapping: 503 Service Unavailable
         UNAVAILABLE = 14, // The service is currently unavailable. This is most likely a transient condition, which can be corrected by retrying with a backoff. Note that it is not always safe to retry non-idempotent operations.
+        // HTTP Mapping: 500 Internal Server Error
         DATA_LOSS = 15, // Unrecoverable data loss or corruption.
+        // HTTP Mapping: 401 Unauthorized
         UNAUTHENTICATED = 16, // The request does not have valid authentication credentials for the operation.
     }
 
@@ -231,6 +248,86 @@ declare namespace nkruntime {
     }
 
     /**
+     * Purchase Notification Apple function definition.
+     */
+    export interface PurchaseNotificationAppleFunction {
+        /**
+         * A Purchase Notification Apple register hook function definition.
+         *
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param purchase - The notification purchase.
+         * @param providerPayload - The raw payload of the provider notificaton.
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, purchase: ValidatedPurchase, providerPayload: string): void;
+    }
+
+    /**
+     * Subscription Notification Apple function definition.
+     */
+       export interface SubscriptionNotificationAppleFunction {
+        /**
+         * A Subscription Notification Apple register hook function definition.
+         *
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param subscription - The notification subscription.
+         * @param providerPayload - The raw payload of the provider notificaton.
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, subscription: ValidatedSubscription, providerPayload: string): void;
+    }
+
+    /**
+     * Purchase Notification Google function definition.
+     */
+    export interface PurchaseNotificationGoogleFunction {
+        /**
+         * A Purchase Notification Google register hook function definition.
+         *
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param purchase - The notification purchase.
+         * @param providerPayload - The raw payload of the provider notificaton.
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, purchase: ValidatedPurchase, providerPayload: string): void;
+    }
+
+    /**
+     * Subscription Notification Google function definition.
+     */
+       export interface SubscriptionNotificationGoogleFunction {
+        /**
+         * A Subscription Notification Google register hook function definition.
+         *
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param subscription - The notification subscription.
+         * @param providerPayload - The raw payload of the provider notificaton.
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, subscription: ValidatedSubscription, providerPayload: string): void;
+    }
+
+    /**
+     * Storage Index Filter function definition.
+     */
+    export interface StorageIndexFilterFunction {
+        /**
+         * A storage index hook function to apply custom filtering logic to storage objects.
+         *
+         * @param ctx - The context for the execution.
+         * @param logger - The server logger.
+         * @param nk - The Nakama server APIs.
+         * @param write - the write to be indexed or deleted from the index
+         * @return a boolean - true to index the object and false to delete any indexed object (if any exists).
+         */
+        (ctx: Context, logger: Logger, nk: Nakama, write: StorageWriteRequest): boolean;
+    }
+
+    /**
      * Match Dispatcher API definition.
      */
     export interface MatchDispatcher {
@@ -287,7 +384,7 @@ declare namespace nkruntime {
         opCode: number;
         data: ArrayBuffer;
         reliable: boolean;
-        receiveTime: number;
+        receiveTimeMs: number;
     }
 
     /**
@@ -533,6 +630,10 @@ declare namespace nkruntime {
         leaderboardId?: string
     }
 
+    export interface DeleteTournamentRecordRequest {
+      tournamentId?: string
+    }
+
     export interface ListLeaderboardRecordsRequest {
         leaderboardId?: string
         ownerIds?: string[]
@@ -729,6 +830,7 @@ declare namespace nkruntime {
         Admin = 1,
         Member = 2,
         JoinRequest = 3,
+        Banned = 4,
     }
 
     export interface GroupUser {
@@ -746,6 +848,7 @@ declare namespace nkruntime {
         ownerRecords?: LeaderboardRecord[]
         nextCursor?: string
         prevCursor?: string
+        rankCount?: number
     }
 
     export interface MatchList {
@@ -770,6 +873,7 @@ declare namespace nkruntime {
         ownerRecords?: LeaderboardRecord[]
         prevCursor?: string
         nextCursor?: string
+        rankCount?: number
     }
 
     export interface TournamentList {
@@ -795,7 +899,7 @@ declare namespace nkruntime {
     /**
      * Realtime hook messages
      */
-    export type RtHookMessage = 'ChannelJoin' | 'ChannelLeave' | 'ChannelMessageSend' | 'ChannelMessageUpdate' | 'ChannelMessageRemove' | 'MatchCreate' | 'MatchDataSend' | 'MatchJoin' | 'MatchLeave' | 'MatchmakerAdd' | 'MatchmakerRemove' | 'StatusFollow' | 'StatusUnfollow' | 'StatusUpdate' | 'Ping' | 'Pong'
+    export type RtHookMessage = 'ChannelJoin' | 'ChannelLeave' | 'ChannelMessageSend' | 'ChannelMessageUpdate' | 'ChannelMessageRemove' | 'MatchCreate' | 'MatchDataSend' | 'MatchJoin' | 'MatchLeave' | 'MatchmakerAdd' | 'MatchmakerRemove' | 'PartyCreate' | 'PartyJoin' | 'PartyLeave' | 'PartyPromote' | 'PartyAccept' | 'PartyRemove' | 'PartyClose' | 'PartyJoinRequestList' | 'PartyMatchmakerAdd' | 'PartyMatchmakerRemove' | 'PartyDataSend' | 'StatusFollow' | 'StatusUnfollow' | 'StatusUpdate' | 'Ping' | 'Pong'
 
     /**
      * Match handler definitions
@@ -951,7 +1055,7 @@ declare namespace nkruntime {
          * @param id - The ID of the RPC function.
          * @param func - The Hook function logic to execute before the RPC is called.
          */
-        registerRtBefore(id: RtHookMessage, func: RtBeforeHookFunction<Envelope>): void;
+        registerRtBefore<T extends Envelope>(id: RtHookMessage, func: RtBeforeHookFunction<T>): void;
 
         /**
          * Register a hook function to be run after an RPC function is invoked.
@@ -960,7 +1064,7 @@ declare namespace nkruntime {
          * @param id - The ID of the RPC function.
          * @param func - The Hook function logic to execute after the RPC is called.
          */
-        registerRtAfter(id: RtHookMessage, func: RtAfterHookFunction<Envelope>): void;
+        registerRtAfter<T extends Envelope>(id: RtHookMessage, func: RtAfterHookFunction<T>): void;
 
         /**
          * Register Before Hook for RPC getAccount function.
@@ -993,6 +1097,22 @@ declare namespace nkruntime {
          * @throws {TypeError}
          */
         registerAfterUpdateAccount(fn: AfterHookFunction<void, UserUpdateAccount>): void;
+
+        /**
+         * Register before Hook for RPC deleteAccount function.
+         *
+         * @param fn - The function to execute before updateAccount.
+         * @throws {TypeError}
+         */
+        registerBeforeDeleteAccount(fn: BeforeHookFunction<void>): void;
+
+        /**
+         * Register after Hook for RPC deleteAccount function.
+         *
+         * @param fn - The function to execute after updateAccount.
+         * @throws {TypeError}
+         */
+        registerAfterDeleteAccount(fn: AfterHookFunction<void, void>): void;
 
         /**
          * Register before Hook for RPC authenticateApple function.
@@ -1473,6 +1593,22 @@ declare namespace nkruntime {
          * @throws {TypeError}
          */
         registerAfterDeleteLeaderboardRecord(fn: AfterHookFunction<void, DeleteLeaderboardRecordRequest>): void;
+
+        /**
+         * Register before Hook for RPC DeleteTournamentRecord function.
+         *
+         * @param fn - The function to execute before DeleteTournamentRecord.
+         * @throws {TypeError}
+         */
+        registerBeforeDeleteTournamentRecord(fn: BeforeHookFunction<DeleteTournamentRecordRequest>): void;
+
+        /**
+         * Register after Hook for RPC DeleteTournamentRecord function.
+         *
+         * @param fn - The function to execute after DeleteTournamentRecord.
+         * @throws {TypeError}
+         */
+        registerAfterDeleteTournamentRecord(fn: AfterHookFunction<void, DeleteTournamentRecordRequest>): void;
 
         /**
          * Register before Hook for RPC ListLeaderboardRecords function.
@@ -2151,6 +2287,54 @@ declare namespace nkruntime {
          * @param fn - The function to execute after a leaderboard resets.
          */
         registerLeaderboardReset(fn: LeaderboardResetFunction): void;
+
+        /**
+         * Register purchase notification Apple handler.
+         *
+         * @param fn - The function to execute after an Apple IAP Notification is received.
+         */
+        registerPurchaseNotificationApple(fn: PurchaseNotificationAppleFunction): void;
+
+        /**
+         * Register purchase notification Apple handler.
+         *
+         * @param fn - The function to execute after an Apple IAP Notification is received.
+         */
+        registerSubscriptionNotificationApple(fn: SubscriptionNotificationAppleFunction): void;
+
+        /**
+         * Register purchase notification Google handler.
+         *
+         * @param fn - The function to execute after a Google IAP Notification is received.
+         */
+        registerPurchaseNotificationGoogle(fn: PurchaseNotificationGoogleFunction): void;
+
+        /**
+         * Register purchase notification Google handler.
+         *
+         * @param fn - The function to execute after a Google IAP Notification is received.
+         */
+        registerSubscriptionNotificationGoogle(fn: SubscriptionNotificationGoogleFunction): void;
+
+        /**
+         * List entries from an existing configured storage index.
+         *
+         * @param name - Name of the new index. Must be unique.
+         * @param collection - Collection of storage engine to index objects from.
+         * @param key - Opt. Key of storage objects to index. Set to null, undefined or emtpy string to index all objects of collection.
+         * @param fields - Array of fields of object to index. The values of these fields will be searchable in the index.
+         * @param maxEntries - Maximum number of entries to keep in the index.
+         * @throws {TypeError, GoError}
+         */
+        registerStorageIndex(name: string, collection: string, key: string, fields: string[], maxEntries: number): void;
+
+        /**
+         * Register purchase notification Google handler.
+         *
+         * @param indexName - The name of the configured index to attach the custom filtering function to.
+         * @param fn - The function to execute to decide whether to index a storage object or delete it from the index.
+         */
+        registerStorageIndexFilter(indexName: string, fn: StorageIndexFilterFunction): void;
     }
 
     /**
@@ -2221,7 +2405,7 @@ declare namespace nkruntime {
     /**
      * Request method type
      */
-    type RequestMethod = "get" | "post" | "put" | "patch" | "head"
+    type RequestMethod = "get" | "post" | "put" | "patch" | "head" | "delete"
 
     /**
      * HTTP Response type
@@ -2412,6 +2596,8 @@ declare namespace nkruntime {
      * Wallet Update Result
      */
     export interface WalletUpdateResult {
+        // The user ID of the wallet.
+        userId: string;
         // The wallet values after the update.
         updated: {[key: string]: number};
         // The wallet value prior to the update.
@@ -2503,7 +2689,7 @@ declare namespace nkruntime {
         description: string;
         category: number;
         authoritative: boolean;
-        sortOrder: SortOrder;
+        sortOrder: number;
         operator: Operator;
         prevReset: number;
         nextReset: number;
@@ -2536,7 +2722,7 @@ declare namespace nkruntime {
         title: string;
         description: string;
         category: number;
-        sortOrder: SortOrder;
+        sortOrder: number;
         size: number;
         maxSize: number;
         maxNumScore: number;
@@ -2585,27 +2771,27 @@ declare namespace nkruntime {
     }
 
     const enum SortOrder {
-        ASCENDING = 'asc',
-        DESCENDING = 'desc',
+        ASCENDING = 'ascending',
+        DESCENDING = 'descending',
     }
 
     const enum Operator {
         BEST = 'best',
         SET = 'set',
-        INCREMENTAL = 'incr',
+        INCREMENTAL = 'increment',
     }
 
     const enum OverrideOperator {
         BEST = 'best',
         SET = 'set',
-        INCREMENTAL = 'incr',
-        DECREMENTAL = 'decr',
+        INCREMENTAL = 'increment',
+        DECREMENTAL = 'decrement',
     }
 
     /**
      * Envelope for realtime message hooks
      */
-    type Envelope = EnvelopeChannel | EnvelopeChannelJoin | EnvelopeChannelLeave | EnvelopeChannelMessageSend | EnvelopeChannelMessageUpdate | EnvelopeChannelMessageRemove | EnvelopeMatchCreateMessage | EnvelopeMatchDataSend | EnvelopeMatchJoin | EnvelopeMatchLeave | EnvelopeMatchmakerAdd | EnvelopeMatchmakerRemove | EnvelopeStatusFollow | EnvelopeStatusUnfollow | EnvelopeStatusUpdate | EnvelopePing | EnvelopePong
+    type Envelope = EnvelopeChannel | EnvelopeChannelJoin | EnvelopeChannelLeave | EnvelopeChannelMessageSend | EnvelopeChannelMessageUpdate | EnvelopeChannelMessageRemove | EnvelopeMatchCreateMessage | EnvelopeMatchDataSend | EnvelopeMatchJoin | EnvelopeMatchLeave | EnvelopeMatchmakerAdd | EnvelopeMatchmakerRemove | EnvelopePartyCreate | EnvelopePartyJoin | EnvelopePartyLeave | EnvelopePartyPromote | EnvelopePartyAccept | EnvelopePartyRemove | EnvelopePartyClose | EnvelopePartyJoinRequestList | EnvelopePartyMatchmakerAdd | EnvelopePartyMatchmakerRemove | EnvelopePartyDataSend | EnvelopeStatusFollow | EnvelopeStatusUnfollow | EnvelopeStatusUpdate | EnvelopePing | EnvelopePong
 
     export interface Channel {
         id?: string,
@@ -2722,6 +2908,107 @@ declare namespace nkruntime {
         matchmakerRemove: MatchmakerRemoveMessage
     }
 
+    export interface PartyCreateMessage {
+        open: boolean
+        maxSize: number
+    }
+
+    export interface EnvelopePartyCreate {
+        partyCreate: PartyCreateMessage
+    }
+
+    export interface PartyJoinMessage {
+        partyId: string
+    }
+
+    export interface EnvelopePartyJoin {
+        partyJoin: PartyJoinMessage
+    }
+
+    export interface PartyLeaveMessage {
+        partyId: string
+    }
+
+    export interface EnvelopePartyLeave {
+        partyLeave: PartyLeaveMessage
+    }
+
+    export interface PartyPromoteMessage {
+        partyId: string
+        presence: Presence
+    }
+
+    export interface EnvelopePartyPromote {
+        partyPromote: PartyPromoteMessage
+    }
+
+    export interface PartyAcceptMessage {
+        partyId: string
+        presence: Presence
+    }
+
+    export interface EnvelopePartyAccept {
+        partyAccept: PartyAcceptMessage
+    }
+
+    export interface PartyRemoveMessage {
+        partyId: string
+        presence: Presence
+    }
+
+    export interface EnvelopePartyRemove {
+        partyRemove: PartyRemoveMessage
+    }
+
+    export interface PartyCloseMessage {
+        partyId: string
+    }
+
+    export interface EnvelopePartyClose {
+        partyClose: PartyCloseMessage
+    }
+
+    export interface PartyJoinRequestListMessage {
+        partyId: string
+    }
+
+    export interface EnvelopePartyJoinRequestList {
+        partyJoinRequestList: PartyJoinRequestListMessage
+    }
+
+    export interface PartyMatchmakerAddMessage {
+        partyId: string
+        minCount: number
+        maxCount: number
+        query: string
+        stringProperties: {[key: string]: string}
+        numericProperties: {[key: string]: number}
+        countMultiple: number
+    }
+
+    export interface EnvelopePartyMatchmakerAdd {
+        partyMatchmakerAdd: PartyMatchmakerAddMessage
+    }
+
+    export interface PartyMatchmakerRemoveMessage {
+        partyId: string
+        ticket: string
+    }
+
+    export interface EnvelopePartyMatchmakerRemove {
+        partyMatchmakerRemove: PartyMatchmakerRemoveMessage
+    }
+
+    export interface PartyDataSendMessage {
+        partyId: string
+        opCode: number
+        data?: string
+    }
+
+    export interface EnvelopePartyDataSend {
+        partyDataSend: PartyDataSendMessage
+    }
+
     export interface StatusFollowMessage {
         userIds: string[]
         usernames: string[]
@@ -2795,42 +3082,38 @@ declare namespace nkruntime {
         validatedSubscription: ValidatedSubscription
     }
 
-    export interface ValidatedPurchaseOwner {
-        validatedPurchase: ValidatedPurchase
-        userId: string
-    }
-
-    export interface ValidatedSubscriptionOwner {
-      validatedSubscription: ValidatedSubscription
-      userId: string
-    }
-
     export type ValidatedPurchaseStore = "APPLE_APP_STORE" | "GOOGLE_PLAY_STORE" | "HUAWEI_APP_GALLERY"
 
     export type ValidatedPurchaseEnvironment = "UNKNOWN" | "SANDBOX" | "PRODUCTION"
 
     export interface ValidatedPurchase {
+        userId: string
         productId: string
         transactionId: string
         store: ValidatedPurchaseStore
         purchaseTime: number
         createTime: number
         updateTime: number
+        refundTime: number
         providerResponse: string
         environment: ValidatedPurchaseEnvironment
         seenBefore: boolean
     }
 
     export interface ValidatedSubscription {
+        userId: string
         productId: string
         originalTransactionId: string
         store: ValidatedPurchaseStore
         purchaseTime: number
         createTime: number
         updateTime: number
+        refundTime: number
         environment: ValidatedPurchaseEnvironment
         expiryTime: string
         active: boolean
+        providerResponse: string
+        providerNotification: string
     }
 
     export interface ValidatedPurchaseList {
@@ -2964,13 +3247,14 @@ declare namespace nkruntime {
          *
          * @param url - Request target URL.
          * @param method - Http method.
-         * @param headers - Http request headers.
-         * @param body - Http request body.
-         * @param timeout - Http Request timeout in ms.
+         * @param headers - Opt. Http request headers. Defaults to no headers.
+         * @param body - Opt. Http request body. Defaults to undefined.
+         * @param timeout - Opt. Http Request timeout in ms. Defaults to 5s.
+         * @param insecure - Opt. Set to true to skip TLS validations. Defaults to false.
          * @returns Http response
          * @throws {TypeError, GoError}
          */
-        httpRequest(url: string, method: RequestMethod, headers?: {[header: string]: string}, body?: string, timeout?: number): HttpResponse
+        httpRequest(url: string, method: RequestMethod, headers?: {[header: string]: string}, body?: string, timeout?: number, insecure?: boolean): HttpResponse
 
         /**
          * Base 64 Encode
@@ -2986,10 +3270,10 @@ declare namespace nkruntime {
          * Base 64 Decode
          *
          * @param string - Input to decode.
-         * @returns Decoded string.
+         * @returns Decoded data as an ArrayBuffer.
          * @throws {TypeError, GoError}
          */
-        base64Decode(s: string, padding?: boolean): string;
+        base64Decode(s: string, padding?: boolean): ArrayBuffer;
 
         /**
          * Base 64 URL Encode
@@ -2998,34 +3282,34 @@ declare namespace nkruntime {
          * @returns URL safe base 64 encoded string.
          * @throws {TypeError}
          */
-        base64UrlEncode(s: string, padding?: boolean): string;
+        base64UrlEncode(s: string | ArrayBuffer, padding?: boolean): string;
 
         /**
          * Base 64 URL Decode
          *
          * @param string - Input to decode.
-         * @returns Decoded string.
+         * @returns Decoded data as an ArrayBuffer.
          * @throws {TypeError, GoError}
          */
-        base64UrlDecode(s: string, padding?: boolean): string;
+        base64UrlDecode(s: string, padding?: boolean): ArrayBuffer;
 
         /**
          * Base 16 Encode
          *
          * @param string - Input to encode.
-         * @returns URL safe base 64 encoded string.
+         * @returns Base 16 encoded string.
          * @throws {TypeError}
          */
-        base16Encode(s: string, padding?: boolean): string;
+        base16Encode(s: string | ArrayBuffer, padding?: boolean): string;
 
         /**
          * Base 16 Decode
          *
          * @param string - Input to decode.
-         * @returns Decoded string.
+         * @returns Decoded data as an ArrayBuffer.
          * @throws {TypeError, GoError}
          */
-        base16Decode(s: string, padding?: boolean): string;
+        base16Decode(s: string, padding?: boolean): ArrayBuffer;
 
         /**
          * Generate a JWT token
@@ -3036,7 +3320,7 @@ declare namespace nkruntime {
          * @returns signed JWT token.
          * @throws {TypeError, GoError}
          */
-        jwtGenerate(s: 'HS256' | 'RS256', signingKey: string, claims: {[key: string]: string | number | boolean}): string;
+        jwtGenerate(algorithm: 'HS256' | 'RS256', signingKey: string, claims: {[key: string]: string | number | boolean}): string;
 
         /**
          * AES 128 bit block size encrypt
@@ -3254,12 +3538,13 @@ declare namespace nkruntime {
          * Generate authentication token.
          *
          * @param userId - User ID.
-         * @param exp - Token expiration, Unix epoch.
-         * @param vars - Arbitrary metadata.
+         * @param username - Opt. Username. If not provided one will be automatically generated.
+         * @param exp - Opt. Token expiration, Unix epoch.
+         * @param vars - Opt. Arbitrary metadata.
          * @returns Object with authenticated user data.
          * @throws {TypeError, GoError}
          */
-        authenticateTokenGenerate(userId: string, exp: number, vars: {[key: string]: string}): TokenGenerateResult;
+        authenticateTokenGenerate(userId: string, username?: string, exp?: number, vars?: {[key: string]: string}): TokenGenerateResult;
 
         /**
          * Get account data by id.
@@ -3455,37 +3740,37 @@ declare namespace nkruntime {
          * Unlink Apple sign in from an account.
          *
          * @param userId - User ID.
-         * @param token - Apple sign in token.
+         * @param token - Opt. Apple sign in token.
          * @throws {TypeError, GoError}
          */
-        unlinkApple(userId: string, token: string): void;
+        unlinkApple(userId: string, token?: string): void;
 
         /**
          * Unlink a customID from an account.
          *
          * @param userId - User ID.
-         * @param customID - Custom ID.
+         * @param customID - Opt. Custom ID.
          * @throws {TypeError, GoError}
          */
-        unlinkCustom(userId: string, customID: string): void;
+        unlinkCustom(userId: string, customID?: string): void;
 
         /**
          * Unlink a custom device from an account.
          *
          * @param userId - User ID.
-         * @param deviceID - Device ID.
+         * @param deviceID - Opt. Device ID.
          * @throws {TypeError, GoError}
          */
-        unlinkDevice(userId: string, deviceID: string): void;
+        unlinkDevice(userId: string, deviceID?: string): void;
 
         /**
          * Unlink username and password from an account.
          *
          * @param userId - User ID.
-         * @param email - Email.
+         * @param email - Opt. Email.
          * @throws {TypeError, GoError}
          */
-        unlinkEmail(userId: string, email: string): void;
+        unlinkEmail(userId: string, email?: string): void;
 
         /**
          * Unlink Facebook from an account.
@@ -3494,7 +3779,7 @@ declare namespace nkruntime {
          * @param token - Password.
          * @throws {TypeError, GoError}
          */
-        unlinkFacebook(userId: string, token: string): void;
+        unlinkFacebook(userId: string, token?: string): void;
 
         /**
          * Unlink Facebook Instant Games from an account.
@@ -3503,7 +3788,7 @@ declare namespace nkruntime {
          * @param signedPlayerInfo - Signed player info.
          * @throws {TypeError, GoError}
          */
-        unlinkFacebookInstantGame(userId: string, signedPlayerInfo: string): void;
+        unlinkFacebookInstantGame(userId: string, signedPlayerInfo?: string): void;
 
         /**
          * Unlink Apple Game Center from an account.
@@ -3519,12 +3804,12 @@ declare namespace nkruntime {
          */
         unlinkGameCenter(
             userId: string,
-            playerId: string,
-            bundleId: string,
-            ts: number,
-            salt: string,
-            signature: string,
-            publicKeyURL: string,
+            playerId?: string,
+            bundleId?: string,
+            ts?: number,
+            salt?: string,
+            signature?: string,
+            publicKeyURL?: string,
         ): void;
 
         /**
@@ -3534,7 +3819,7 @@ declare namespace nkruntime {
          * @param token - Google token.
          * @throws {TypeError, GoError}
          */
-        unlinkGoogle(userId: string, token: string): void;
+        unlinkGoogle(userId: string, token?: string): void;
 
         /**
          * Unlink Steam from an account.
@@ -3543,14 +3828,14 @@ declare namespace nkruntime {
          * @param token - Steam token.
          * @throws {TypeError, GoError}
          */
-        unlinkSteam(userId: string, token: string): void;
+        unlinkSteam(userId: string, token?: string): void;
 
         /**
          * List stream presences.
          *
          * @param stream - Stream object.
-         * @param includeHidden - Optional argument to include hidden presences in the list or not, default true.
-         * @param includeNotHidden - Optional argument to include not hidden presences in the list or not, default true.
+         * @param includeHidden - Opt. Include hidden presences in the list or not, default true.
+         * @param includeNotHidden - Opt. Include not hidden presences in the list or not, default true.
          * @returns List of presence objects.
          * @throws {TypeError}
          */
@@ -3879,16 +4164,14 @@ declare namespace nkruntime {
         leaderboardDelete(leaderboardID: string): void;
 
         /**
-         * Get a list of tournaments by id.
+         * Get a list of leaderboards.
          *
-         * @param categoryStart - Filter leaderboard with categories greater or equal than this value.
-         * @param categoryEnd - Filter leaderboard with categories equal or less than this value.
          * @param limit - Return only the required number of leaderboard denoted by this limit value.
          * @param cursor - Cursor to paginate to the next result set. If this is empty/null there is no further results.
-         * @returns The leaderboard data for the given ids.
+         * @returns The leaderboards data.
          * @throws {TypeError, GoError}
          */
-         leaderboardList(categoryStart?: number, categoryEnd?: number, limit?: number, cursor?: string): LeaderboardList;
+         leaderboardList(limit?: number, cursor?: string): LeaderboardList;
 
         /**
          * List records of a leaderboard.
@@ -3922,7 +4205,7 @@ declare namespace nkruntime {
          * Delete a leaderboard record.
          *
          * @param leaderboardID - Leaderboard id.
-         * @param ownerID - Array of leaderboard owners.
+         * @param ownerID - Leaderboard record owner.
          * @throws {TypeError, GoError}
          */
         leaderboardRecordDelete(leaderboardID: string, ownerID: string): void;
@@ -4027,7 +4310,7 @@ declare namespace nkruntime {
         tournamentsGetId(tournamentIds: string[]): Tournament[];
 
         /**
-         * Get a list of tournaments by id.
+         * Get a list of tournaments.
          *
          * @param categoryStart - Filter tournament with categories greater or equal than this value.
          * @param categoryEnd - Filter tournament with categories equal or less than this value.
@@ -4035,7 +4318,7 @@ declare namespace nkruntime {
          * @param endTime - Filter tournament with that end before this time.
          * @param limit - Return only the required number of tournament denoted by this limit value.
          * @param cursor - Cursor to paginate to the next result set. If this is empty/null there is no further results.
-         * @returns The tournament data for the given ids.
+         * @returns The tournaments data.
          * @throws {TypeError, GoError}
          */
         tournamentList(categoryStart?: number, categoryEnd?: number, startTime?: number, endTime?: number, limit?: number, cursor?: string): TournamentList;
@@ -4067,6 +4350,15 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         tournamentRecordWrite(id: string, ownerID: string, username?: string, score?: number, subscore?: number, metadata?: {[key: string]: any}, operator?: OverrideOperator): LeaderboardRecord;
+
+        /**
+         * Delete a tournament record.
+         *
+         * @param tournamentID - Tournament id.
+         * @param ownerID - Tournament record owner.
+         * @throws {TypeError, GoError}
+         */
+        tournamentRecordDelete(tournamentID: string, ownerID: string): void;
 
         /**
          * Fetch the list of tournament records around the owner.
@@ -4114,7 +4406,7 @@ declare namespace nkruntime {
          * @param limit - Maximum number of members to have in the group. Use null if field is not being updated.
          * @throws {TypeError, GoError}
          */
-        groupUpdate(groupId: string, userId: string, name?: string | null, creatorID?: string | null, lang?: string | null, description?: string | null, avatarURL?: string | null, open?: boolean | null, metadata?: {[key: string]: any} | null, limit?: number | null): void;
+        groupUpdate(groupId: string, userId: string | null, name?: string | null, creatorID?: string | null, lang?: string | null, description?: string | null, avatarURL?: string | null, open?: boolean | null, metadata?: {[key: string]: any} | null, limit?: number | null): void;
 
         /**
          * Delete a group.
@@ -4160,6 +4452,14 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
         groupsList(name?: string, langTag?: string, open?: boolean, members?: number, limit?: number, cursor?: string): GroupList;
+
+        /**
+         * Get group data for a given number of random groups.
+         *
+         * @param count - Number of groups to retrieve.
+         * @throws {TypeError, GoError}
+         */
+         groupsGetRandom(count: number): Group[]
 
         /**
          * List all groups the user belongs to.
@@ -4338,7 +4638,7 @@ declare namespace nkruntime {
          * @returns The data of the validated and stored purchase.
          * @throws {TypeError, GoError}
          */
-        purchaseGetByTransactionId(transactionID: string): ValidatedPurchaseOwner
+        purchaseGetByTransactionId(transactionID: string): ValidatedPurchase
 
         /**
          * List validated and stored purchases.
@@ -4384,7 +4684,7 @@ declare namespace nkruntime {
          * @returns The data of the validated and stored purchase.
          * @throws {TypeError, GoError}
          */
-        subscriptionGetByProductId(userID: string, productID: string): ValidatedPurchaseOwner
+        subscriptionGetByProductId(userID: string, productID: string): ValidatedSubscription
 
         /**
          * List validated and stored purchases.
@@ -4456,6 +4756,50 @@ declare namespace nkruntime {
          * @throws {TypeError, GoError}
          */
          cronNext(cron: string, timestamp: number): number
+
+        /**
+         * Get local cache data by key.
+         *
+         * @param key - local cache key.
+         * @throws {TypeError, GoError}
+         * @returns local cache object.
+         */
+        localcacheGet(key: string): any;
+
+        /**
+         * Put data to local cache.
+         *
+         * @param key - local cache key.
+         * @param value - local cache value.
+         * @throws {TypeError, GoError}
+         */
+        localcachePut(key: string, value: any): void;
+
+        /**
+         * Delete local cache data by key.
+         *
+         * @param key - local cache key.
+         * @throws {TypeError, GoError}
+         */
+        localcacheDelete(key: string): void;
+
+        /**
+         * List entries from an existing configured storage index.
+         *
+         * @param indexName - Index to query.
+         * @param query - The query to specify the index lookup criteria.
+         * @param limit - The maximum number of results to retrieve from the index.
+         * @returns A list of storage objects matching the query criteria.
+         * @throws {TypeError, GoError}
+         */
+        storageIndexList(idnexName: string, query: string, limit: number): StorageObject[];
+
+        /**
+         * Get Satori object.
+         *
+         * @returns The satori integration interface.
+         */
+        getSatori(): Satori;
     }
 
     /**
@@ -4475,5 +4819,111 @@ declare namespace nkruntime {
          * @param initializer - The injector to initialize features in the game server.
          */
         (ctx: Context, logger: Logger, nk: Nakama, initializer: Initializer): void;
+    }
+
+    export interface Properties {
+        default: {[key: string]: string}
+        custom: {[key: string]: string}
+        computed: {[key: string]: string}
+    }
+
+    export interface PropertiesUpdate {
+        default?: {[key: string]: string}
+        custom?: {[key: string]: string}
+        recompute?: boolean
+    }
+
+    export interface SatoriEvent {
+        name: string
+        id: string
+        metadata?: {[key: string]: string}
+        value: string
+        timestamp: number
+    }
+
+    export interface Experiment {
+        name: string
+        value: string
+    }
+
+    export interface Flag {
+        name: string
+        value: string
+        conditionChanged: boolean
+    }
+
+    export interface LiveEvent {
+        name: string
+        description: string
+        value: string
+        activeStartTime: number
+        activeEndTime: number
+    }
+
+    /**
+     * The Satori integration functions.
+     */
+    export interface Satori {
+        /**
+         * Create identity.
+         *
+         * @param id - Identity identifier.
+         * @throws {TypeError, GoError}
+         */
+        authenticate(id: string): void
+
+        /**
+         * Get identity properties.
+         *
+         * @param id - Identity identifier.
+         * @returns The identity properties.
+         * @throws {TypeError, GoError}
+         */
+        propertiesGet(id: string): Properties[]
+
+        /**
+         * Update identity properties.
+         *
+         * @param id - Identity identifier.
+         * @param properties - Updated properties.
+         * @throws {TypeError, GoError}
+         */
+        propertiesUpdate(id: string, properties: PropertiesUpdate): void
+
+        /**
+         * Publish events.
+         *
+         * @param id - Identity identifier.
+         * @param events - Events to publish.
+         * @throws {TypeError, GoError}
+         */
+        eventsPublish(id: string, events: SatoriEvent[]): void
+
+        /**
+         * List experiments.
+         *
+         * @param id - Identity identifier.
+         * @param names - Opt. List of experiment names.
+         * @throws {TypeError, GoError}
+         */
+        experimentsList(id: string, names?: string[]): Experiment[]
+
+        /**
+         * List flags.
+         *
+         * @param id - Identity identifier.
+         * @param names - Opt. List of flag names.
+         * @throws {TypeError, GoError}
+         */
+        flagsList(id: string, names?: string[]): Flag[]
+
+        /**
+         * List live events.
+         *
+         * @param id - Identity identifier.
+         * @param names - Opt. List of live event names.
+         * @throws {TypeError, GoError}
+         */
+        liveEventsList(id: string, names?: string[]): LiveEvent[]
     }
 }

@@ -4,7 +4,82 @@ All notable changes to this project are documented below.
 The format is based on [keep a changelog](http://keepachangelog.com) and this project uses [semantic versioning](http://semver.org).
 
 ## [Unreleased]
+### Fixed
+- Fixed linter-found test issue.
 
+## [1.28.1] - 2023-08-23
+### Added
+- Add Satori `recompute` optional input parameter to relevant operations.
+
+### Changed
+- Use generics in realtime before and after TS runtime hook definitions.
+
+### Fixed
+- Use correct Satori live event active start and end time field type.
+
+## [1.28.0] - 2023-07-19
+### Added
+- Add storage object indexing support and related runtime functions.
+- Add missing TypeScript validated subscription fields.
+- Add TypeScript error code mappings to HTTP status codes.
+- Add rank count parameter to leaderboard score listings.
+- Add rank count parameter to tournament score listings.
+
+### Changed
+- Remove incorrect category start and category end parameters from runtime leaderboard list functions.
+- Update to Protobuf v1.31.0 dependency.
+
+## [1.27.0] - 2023-04-18
+### Added
+- Add local cache functions to JavaScript server framework.
+- Add "tournamentRecordDelete" function to server frameworks.
+- New "insecure" flag to "httpRequest" TypeScript function.
+- [Satori](https://heroiclabs.com/satori/) API available to Nakama server in all server frameworks.
+- New "MatchmakerOverride" hook to provide custom matching behaviour.
+
+### Changed
+- User ID is now returned in ValidatedSubscription, and ValidatedPurchases types.
+- ValidatedSubscription types are visible to the Go server framework.
+- Add "refundTime" field to TypeScript ValidatedSubscription type.
+- Loosened TypeScript definitions to allow for no identifier to be passed to Unlink operations.
+
+### Fixed
+- Various small TypeScript definitions fixes.
+
+## [1.26.0] - 2023-01-04
+### Added
+- Add party hook messages to JavaScript runtime.
+- Add In-App Purchase notification callback functions to the server runtimes.
+- Add "DeleteAccount" before and after hook functions to the server runtimes.
+
+## Changed
+- Accept the leaderboard operator types in their expanded string name.
+- Added userID param to Go runtime GroupUpdate function.
+
+## Fixed
+- Update Type definition for "authenticateTokenGenerate" to support the optional params allowed by the server.
+- Make public the "ChannelMessageRemove" function to the server Go runtime.
+- Allow DELETE method to be used in HTTP requests.
+
+## [1.25.0] - 2022-10-14
+### Added
+- New "GroupsGetRandom" function added to the runtimes.
+- New "NotificationsDelete" function added to the runtimes.
+- The server version is now visible to server framework code within the context object.
+
+### Changed
+- JavaScript runtime Base64 encode accepts string or ArrayBuffer input.
+- JavaScript runtime Base64 URL encode accepts string or ArrayBuffer input.
+- JavaScript runtime Base16 encode accepts string or ArrayBuffer input.
+- JavaScript runtime Base64 decode returns ArrayBuffer output.
+- JavaScript runtime Base64 URL decode returns ArrayBuffer output.
+- JavaScript runtime Base16 decode returns ArrayBuffer output.
+- The groupUpdate function argument for a user ID is now optional in the type definition.
+- Update to Protobuf v1.28.1 dependency.
+
+### Fixed
+- Add user ID to JS runtime wallet operations returned results.
+- Type definition for field name used in MatchMessage type is correct in TypeScript.
 
 ## [1.24.0] - 2022-08-18
 ### Added
@@ -32,7 +107,7 @@ The format is based on [keep a changelog](http://keepachangelog.com) and this pr
 
 ### Changed
 - Update naming of delete notifications before/after hook registration functions.
-- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions. 
+- Allow storage writes to accept "undefined" as a user ID input in the TypeScript definitions.
 
 ### Fixed
 - Rename field in "ValidatedPurchase" to "providerResponse" to match what the server returns.

@@ -3310,7 +3310,7 @@ declare namespace nkruntime {
         validatedSubscription: ValidatedSubscription
     }
 
-    export type ValidatedPurchaseStore = "APPLE_APP_STORE" | "GOOGLE_PLAY_STORE" | "HUAWEI_APP_GALLERY" | "FACEBOOK_INSTANT_STORE" | "SAMSUNG_GALAXY_STORE"
+    export type ValidatedPurchaseStore = "APPLE_APP_STORE" | "GOOGLE_PLAY_STORE" | "HUAWEI_APP_GALLERY" | "FACEBOOK_INSTANT_STORE" | "SAMSUNG_GALAXY_STORE" | "CAFE_BAZAAR" | "MYKET"
 
     export type ValidatedPurchaseEnvironment = "UNKNOWN" | "SANDBOX" | "PRODUCTION"
 
